@@ -6,7 +6,7 @@ import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs"
 import { expect } from "chai"
 import { ethers } from "hardhat"
 import { Message, PrivateKey, crypto } from 'bitcore-lib'
-import * as elliptic from 'elliptic'
+import { toChecksumAddress, bufferToHex, publicToAddress } from "ethereumjs-util"
 
 describe("BitMessage", function () {
 
@@ -17,14 +17,10 @@ describe("BitMessage", function () {
 
     const [signer] = await ethers.getSigners()
     
-    //generate random bit signer
-    const curve = new elliptic.ec('secp256k1')
+    //generate random signer
+    const ethwallet = ethers.Wallet.createRandom()
 
-    const secret = curve.genKeyPair().getPrivate().toString('hex')
-
-    const bitkey = new PrivateKey(secret)
-    
-    const ethwallet = new ethers.Wallet(secret)
+    const bitkey = new PrivateKey(ethwallet.privateKey.substring(2))
 
     return { bitmessage, signer, bitkey, ethwallet }
   }
@@ -32,6 +28,25 @@ describe("BitMessage", function () {
   function toBeHex(data: Buffer) : string {
     return ethers.toBeHex(BigInt('0x' + data.toString('hex')), 32)
   }
+
+  function compressedPublicKeyToAddress(compressedPublicKey:string) {
+    const publicKeyBuffer = Buffer.from(compressedPublicKey, 'hex')
+    const addressBuffer = publicToAddress(publicKeyBuffer, true)
+
+    const addressHex = bufferToHex(addressBuffer)
+
+    const ethAddress = toChecksumAddress(addressHex)
+
+    return ethAddress
+}
+
+  describe("Convert Address", function(){
+    it("Should convert public key to right address", async function () {
+      const {bitkey, ethwallet } = await loadFixture(deployOneYearLockFixture)
+      const address = compressedPublicKeyToAddress(bitkey.toPublicKey().toBuffer().toString('hex'))
+      expect(address).to.equal(await ethwallet.getAddress())
+    })
+  })
 
   describe("Message Digest", function () {
     it("Should return the right bit message digest", async function () {
@@ -67,6 +82,9 @@ describe("BitMessage", function () {
         v: (s.i ? 0x1c: 0x1b)
       })
       console.log('eth signature:', convertedSign.serialized)
+      ethers.assertArgument
+      // const address = computeAddress(bitkey.publicKey.toBuffer().toString('hex'))
+      // console.log('eth address:', address)
       console.log('signer address:',await ethwallet.getAddress())
       const recoveredAddress = await bitmessage.recover(ethDigest, convertedSign.serialized)
       console.log('recovered address:', recoveredAddress)
