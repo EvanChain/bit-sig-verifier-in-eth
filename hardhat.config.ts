@@ -1,7 +1,6 @@
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 import { NetworksUserConfig } from "hardhat/types"
-import "@nomicfoundation/hardhat-toolbox"
 import { config as dotenvConfig } from "dotenv"
 import { resolve } from "path"
 import "./tasks/deploy"
