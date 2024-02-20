@@ -3,7 +3,6 @@ import "@nomicfoundation/hardhat-toolbox";
 import { NetworksUserConfig } from "hardhat/types"
 import { config as dotenvConfig } from "dotenv"
 import { resolve } from "path"
-import "./tasks/deploy"
 
 dotenvConfig({ path: resolve(__dirname, ".env") })
 

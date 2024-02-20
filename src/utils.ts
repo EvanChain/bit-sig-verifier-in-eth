@@ -1,12 +1,15 @@
+import { Buffer } from "buffer"
 import { ethers } from "ethers"
 import { Message, crypto } from 'bitcore-lib'
 import { toChecksumAddress, bufferToHex, publicToAddress } from "ethereumjs-util"
+
+globalThis.Buffer = Buffer
 
 function toBeHex(data: Buffer) : string {
     return ethers.toBeHex(BigInt('0x' + data.toString('hex')), 32)
 }
 
-export function compressedPublicKeyToAddress(compressedPublicKey:string) {
+export function compressedPublicKeyToAddress(compressedPublicKey:string) : string {
     const publicKeyBuffer = Buffer.from(compressedPublicKey, 'hex')
     const addressBuffer = publicToAddress(publicKeyBuffer, true)
 
