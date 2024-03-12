@@ -13,15 +13,22 @@ library BitMessage{
         }
     }
 
-    function recover(bytes32 keccakDigest, bytes memory signature) public pure returns(address){
+    function recover(bytes32 keccakDigest, bytes memory signature, bool stringMessage) public pure returns(address){
         (bytes32 r, bytes32 s, uint8 v) = _splitSignature(signature);
-        bytes32 digest = messageDigest(keccakDigest);
+        bytes32 digest = stringMessage? messageDigest(keccakDigest) : messageDigestFromBufferMessage(keccakDigest);
         return ecrecover(digest, v, r, s);
     }
 
-    // expect input 0xc8ee0d506e864589b799a645ddb88b08f5d39e8049f9f702b3b61fa15e55fc73 output 0x65e18fc52d1c8f18497e118c8db284fbbbb906c528eb271be9cf572826fdfdcc
+    // message digest from message in string type
     function messageDigest(bytes32 keccakDigest) public pure returns(bytes32){
         return shasha256(_buildBtcMessage(keccakDigest));
+    }
+
+    // message digest from message in buffer type   
+    function messageDigestFromBufferMessage(bytes32 keccakDigest) public pure returns(bytes32){
+        // 0x20 is the length in bytes of hash,
+        // enforced by the type signature above
+        return shasha256(abi.encodePacked("\x18Bitcoin Signed Message:\n\x20", keccakDigest));
     }
 
     // Build bit message data from keccak digest

@@ -6,3 +6,4 @@ artifacts
 coverage
 .DS_Store
 coverage.json
+dist
