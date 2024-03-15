@@ -30,3 +30,6 @@ async function () {
 }
 
 ```
+
+
+[LEARN MORE](https://bsaa.gitbook.io/bsaa-wallet/)
